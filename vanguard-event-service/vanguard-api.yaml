@@ -1,0 +1,51 @@
+openapi: 3.0.1
+info:
+  title: Vanguard service
+  description: Vanguard event service
+  termsOfService: 'http://swagger.io/terms/'
+  license:
+    name: Apache 2.0
+    url: 'http://springdoc.org'
+  version: '1.0'
+servers:
+  - url: 'http://localhost:8080'
+    description: Generated server url
+paths:
+  /v1/events/getFilteredData:
+    get:
+      tags:
+        - event-details-controller
+      description: Get filtered data
+      operationId: getAllNumbers
+      responses:
+        '200':
+          description: Success
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/EventDetails'
+        '400':
+          description: Bad Request
+        '401':
+          description: Unauthorized
+        '500':
+          description: Internal server error
+components:
+  schemas:
+    EventDetails:
+      type: object
+      properties:
+        eventId:
+          type: integer
+          format: int32
+        buyer_party:
+          type: string
+        seller_party:
+          type: string
+        premium_amount:
+          type: number
+          format: float
+        premium_currency:
+          type: string
