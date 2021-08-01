@@ -1,12 +1,20 @@
 package com.vanguard.application;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +23,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import com.vanguard.exceptions.CustomException;
@@ -30,7 +39,9 @@ import io.swagger.v3.oas.models.info.License;
 public class VanguardEventServiceApplication {
 	@Autowired
 	private EventBuilderService eventBuilderService;
-	
+	@Value(value = "${event.filenames}")
+	private String fileNames;
+
 	public static void main(String[] args) {
 		SpringApplication.run(VanguardEventServiceApplication.class, args);
 	}
@@ -44,21 +55,20 @@ public class VanguardEventServiceApplication {
 	}
 
 	@Bean
-	public void readXMLData() {
-
+	@Profile("!test")
+	public void readXMLData() throws URISyntaxException, IOException {
 		ClassLoader classLoader = getClass().getClassLoader();
-		URL resource = classLoader.getResource("eventXmls");
-		List<File> fileList = null;
-		try {
-			fileList = Files.walk(Paths.get(resource.toURI())).filter(Files::isRegularFile).map(x -> x.toFile())
-					.collect(Collectors.toList());
-		} catch (IOException e) {
-			throw new CustomException("Error reading xml files");
-		} catch (URISyntaxException e2) {
-			throw new CustomException("Error reading xml files");
-		}
-		
-		eventBuilderService.buildEventDetails(fileList);
+		List<String> files = null;
+		files = Arrays.asList(fileNames.split(","));
+		List<InputStream> finalList = files.stream().map(fi -> {
+			try {
+				InputStream is = classLoader.getResourceAsStream("eventXmls/" + fi);
+				return is;
+			} catch (Exception e) {
+				throw new CustomException("Error in reading files");
+			}
+		}).collect(Collectors.toList());
+		eventBuilderService.buildEventDetails(finalList);
 	}
 
 }

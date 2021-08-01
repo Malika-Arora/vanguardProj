@@ -2,6 +2,7 @@ package com.vanguard.service;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -48,7 +49,7 @@ public class EventBuilderService {
 		this.eventDetailRepository = eventDetailRepository2;
 	}
 
-	public void buildEventDetails(List<File> fileList) {
+	public void buildEventDetails(List<InputStream> fileList) {
 		fileList.forEach(file -> {
 			EventDetails eventDetails = new EventDetails();
 			try {
